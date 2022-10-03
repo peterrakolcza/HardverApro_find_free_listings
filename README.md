@@ -2,7 +2,7 @@
 This script allows the user to extract the free items from HardverApró.
 
 ## Usage
-First install the required packages
+First, install the required packages
 ```python
 pip install -r requirements.txt
 ```
