@@ -1,3 +1,5 @@
+![HardverApró](https://cdn.rios.hu/design/ha/logo.png)
+
 # HardverApro - find free listings
 This script allows the user to extract the free items from HardverApró.
 
