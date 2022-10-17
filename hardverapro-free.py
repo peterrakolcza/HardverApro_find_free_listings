@@ -15,6 +15,7 @@ url = '/aprok/keres.php?search_exac=0&search_title=0&buying=0&noiced=1&offset=0'
 
 free_items = []
 free_items_links = []
+free_items_imgs = []
 
 # Finding the last section
 request = urllib.request.Request (base_url + url)
@@ -47,11 +48,16 @@ while url != None:
             link = link.strip()
             title = parent.find_all("div", class_="uad-title")
             title = title[0].text.strip()
+
+            parent = parent.parent
+            img = parent.findChildren("img", recursive="False")
+            img = "https:" + img[0]["src"]
             
             # Check is not necessary, but I will leave it here for future upgrades of the script
             if title not in free_items:
                 free_items.append(title)
                 free_items_links.append(link)
+                free_items_imgs.append(img)
 
     # Trying to locate the next section
     try:
@@ -61,10 +67,9 @@ while url != None:
         url = None
 
 # Writing extracted data in a csv file
-with open('free_items.csv', 'a') as csv_file:
+with open('free_items.csv', 'w') as csv_file:
     writer = csv.writer(csv_file, delimiter=',')
-    writer.writerow(['Title','Link'])
-    for col1,col2 in zip(free_items, free_items_links):
-        writer.writerow([col1, col2])
+    for col1,col2,col3 in zip(free_items, free_items_links, free_items_imgs):
+        writer.writerow([col1, col2, col3])
 
 bar.finish()
