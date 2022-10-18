@@ -9,7 +9,7 @@ services:
     build: ./web
     container_name: web
     ports:
-      - "8888":"5000"
+      - "8888:5000"
     volumes:
       - shared-volume:/src
     depends_on:
