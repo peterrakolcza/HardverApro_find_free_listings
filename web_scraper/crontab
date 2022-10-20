@@ -1,1 +1,1 @@
-0 1 * * * python hardverapro-free.py
+0 */12 * * * python hardverapro-free.py

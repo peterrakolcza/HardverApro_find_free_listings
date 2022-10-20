@@ -4,14 +4,14 @@ services:
     build: ./web_scraper
     container_name: web_scraper  
     volumes:
-      - shared-volume:/src
+      - shared-volume:/web_scraper
   web:
     build: ./web
     container_name: web
     ports:
-      - "8888:5000"
+      - "8090:5000"
     volumes:
-      - shared-volume:/src
+      - shared-volume:/web
     depends_on:
       - web_scraper
 
