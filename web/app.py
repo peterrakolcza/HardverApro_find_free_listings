@@ -65,6 +65,11 @@ def update_items():
                     title = parent.find_all("div", class_="uad-title")
                     title = title[0].text.strip()
 
+                    # Filter
+                    filtered = [ "eladó", "adás-vétel", "keresünk", "áron" ]
+                    if any(x in title.lower() for x in filtered):
+                        continue
+
                     parent = parent.parent
                     img = parent.findChildren("img", recursive="False")
                     img = "https:" + img[0]["src"]
