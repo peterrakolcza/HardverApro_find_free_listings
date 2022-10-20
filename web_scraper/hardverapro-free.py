@@ -54,7 +54,7 @@ while url != None:
             img = "https:" + img[0]["src"]
             
             # Check is not necessary, but I will leave it here for future upgrades of the script
-            if title not in free_items:
+            if link not in free_items_links:
                 free_items.append(title)
                 free_items_links.append(link)
                 free_items_imgs.append(img)

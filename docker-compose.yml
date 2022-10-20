@@ -1,19 +1,12 @@
 version: "3"
 services:
-  web_scraper:
-    build: ./web_scraper
-    container_name: web_scraper  
-    volumes:
-      - shared-volume:/web_scraper
   web:
     build: ./web
     container_name: web
     ports:
       - "8090:5000"
     volumes:
-      - shared-volume:/web
-    depends_on:
-      - web_scraper
+      - shared-volume:/src
 
 volumes:
   shared-volume:
