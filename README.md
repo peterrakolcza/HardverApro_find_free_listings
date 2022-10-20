@@ -1,17 +1,18 @@
 ![HardverApró](https://cdn.rios.hu/design/ha/logo.png)
 
 # HardverApró - find free listings
-This script allows the user to extract the free items from HardverApró.
+This script allows the user to extract the free items from HardverApró and view it in a browser.
 
 ## Usage
-First, install the required packages
+First, install Docker and docker-compose
+After that, you can use the following command to start the container
 ```python
-pip install -r requirements.txt
+docker-compose up
 ```
 
-After that, you can use the script
-```python
-python hardverapro-free.py
+Finally, you can visit the website locally at port 8090
+```
+http://127.0.0.1:8090
 ```
 
-The script will create a  CSV file file from the extracted data.
+(Or you can just run `python app.py` inside the `web` folder and run it without Docker)
