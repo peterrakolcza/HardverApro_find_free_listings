@@ -3,7 +3,7 @@
 # HardverApró - find free listings
 This script allows the user to extract the free items from HardverApró and view it in a browser.
 
-## Usage
+## ⚠️Usage
 First, install Docker and docker-compose
 After that, you can use the following command to start the container
 ```python
@@ -16,3 +16,11 @@ http://127.0.0.1:8090
 ```
 
 (Or you can just run `python app.py` inside the `web` folder and run it without Docker)
+
+## 📝Todo
+- show frozen banner
+- list very cheap listing
+- filter payed listing
+- list faulty devices
+- organize listings into categories
+- extend it to more sites
