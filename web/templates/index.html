@@ -16,6 +16,8 @@
 				<div class="row justify-content-center text-center">
 						<div class="col-md-8 col-lg-6">
                             <div class="header">
+								<h3>⚠️ This script allows the user to extract the free / very cheap items from HardverApró and view it in a browser. ⚠️</h3>
+								<br>
                                 <h3>Free stuff</h3>
 								<h2>On HardverApró</h2>
                                 <img src="https://cdn.rios.hu/design/ha/logo-favicon.png" alt="logo" style="height: 50px; width: auto; border-radius: 10%;">
@@ -89,9 +91,16 @@
 							<a href= {{ item[2] }} >
                                 <div class="single-product">
 									<div class="part-1">
+										{% if item[5] == "True" %}
+										<span class="discount">
+											<span class="fas fa-snowflake fa-lg" aria-hidden="true"></span> 
+											Jegelve
+										</span>
+										{% endif %}
 									</div>
 									<div class="part-2">
 											<h3 class="product-title">{{ item[1] }}</h3>
+											<h4 class="product-price">{{ item[4] }}</h4>
 									</div>
 							    </div>
                             </a>

@@ -7,6 +7,8 @@ from bs4 import BeautifulSoup
 from flask_sqlalchemy import SQLAlchemy
 from flask_statistics import Statistics
 app = Flask(__name__)
+
+""" Statistics - only working without Docker container
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///database.db"
 
 db = SQLAlchemy(app)
@@ -32,16 +34,19 @@ class Request(db.Model):
 db.create_all()
 
 statistics = Statistics(app, db, Request)
+"""
 
 def update_items():
     while True:
         # Base and starting URL
         base_url = 'https://hardverapro.hu'
-        url = '/aprok/keres.php?search_exac=0&search_title=0&buying=0&noiced=1&offset=0'
+        url = '/aprok/keres.php?search_exac=0&search_title=0&buying=0&noiced=0&offset=0'
 
         free_items = []
         free_items_links = []
         free_items_imgs = []
+        free_items_price = []
+        isItFrozen = []
 
 
         # Processing
@@ -56,7 +61,9 @@ def update_items():
             price = parse.find_all("div", class_="uad-price")
             
             for row in price:
-                if row.text == "Ingyenes":
+                if row.text == "Csere" or row.text == "Keresem":
+                    continue
+                if row.text == "Ingyenes" or int(row.text.replace("Ft", "").replace(" ", "")) <= 100:
                     parent = row.parent
                     parent = parent.parent
                     link = parent.findChildren("a", recursive="False")
@@ -66,7 +73,7 @@ def update_items():
                     title = title[0].text.strip()
 
                     # Filter
-                    filtered = [ "eladó", "adás-vétel", "keresünk", "áron" ]
+                    filtered = [ "eladó", "adás-vétel", "keresünk", "áron", "előresorolt" ]
                     if any(x in title.lower() for x in filtered):
                         continue
 
@@ -77,6 +84,11 @@ def update_items():
                     free_items.append(title)
                     free_items_links.append(link)
                     free_items_imgs.append(img)
+                    free_items_price.append(row.text)
+                    if parent.find('span', {'class': 'fas fa-snowflake fa-lg'}) != None:
+                        isItFrozen.append(True)
+                    else:
+                        isItFrozen.append(False)
 
             # Trying to locate the next section
             try:
@@ -87,8 +99,8 @@ def update_items():
         # Writing extracted data in a csv file
         with open('free_items.csv', 'w') as csv_file:
             writer = csv.writer(csv_file, delimiter=',')
-            for col1,col2,col3 in zip(free_items, free_items_links, free_items_imgs):
-                writer.writerow([col1, col2, col3])
+            for col1,col2,col3,col4,col5 in zip(free_items, free_items_links, free_items_imgs, free_items_price, isItFrozen):
+                writer.writerow([col1, col2, col3, col4, col5])
         
         print("Updated the CSV file at: " + time.ctime())
         time.sleep(60 * 60 * 12)
@@ -100,7 +112,7 @@ def list_free_items():
         csv_reader = csv.reader(csv_file, delimiter=',')
         line_counter = 0
         for row in csv_reader:
-            items.append( [ line_counter, row[0], row[1], row[2] ] )
+            items.append( [ line_counter, row[0], row[1], row[2], row[3], row[4] ] )
             line_counter = line_counter + 1
 
     return render_template('index.html', items=items)

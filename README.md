@@ -18,9 +18,6 @@ http://127.0.0.1:8090
 (Or you can just run `python app.py` inside the `web` folder and run it without Docker)
 
 ## 📝Todo
-- show frozen banner
-- list very cheap listing
-- filter payed listing
 - list faulty devices
 - organize listings into categories
 - extend it to more sites
