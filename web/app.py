@@ -122,4 +122,4 @@ def list_free_items():
 if __name__ == "__main__":
     update_items = threading.Thread(target=update_items, daemon=True, name="Updater")
     update_items.start()
-    app.run()
+    app.run(host='0.0.0.0')
