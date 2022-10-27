@@ -73,7 +73,7 @@ def update_items():
                     title = title[0].text.strip()
 
                     # Filter
-                    filtered = [ "eladó", "adás-vétel", "keresünk", "áron", "előresorolt" ]
+                    filtered = [ "eladót", "adás-vétel", "keresünk", "áron", "előresorolt" ]
                     if any(x in title.lower() for x in filtered):
                         continue
 
@@ -99,6 +99,7 @@ def update_items():
         # Writing extracted data in a csv file
         with open('free_items.csv', 'w') as csv_file:
             writer = csv.writer(csv_file, delimiter=',')
+            writer.writerow( [ time.ctime() ] )
             for col1,col2,col3,col4,col5 in zip(free_items, free_items_links, free_items_imgs, free_items_price, isItFrozen):
                 writer.writerow([col1, col2, col3, col4, col5])
         
@@ -108,18 +109,22 @@ def update_items():
 @app.route('/')
 def list_free_items():
     items = []
+    time = ""
     with open('free_items.csv') as csv_file:
         csv_reader = csv.reader(csv_file, delimiter=',')
         line_counter = 0
         for row in csv_reader:
-            items.append( [ line_counter, row[0], row[1], row[2], row[3], row[4] ] )
+            if line_counter == 0:
+                time = row[0]
+            else:
+                items.append( [ line_counter, row[0], row[1], row[2], row[3], row[4] ] )
             line_counter = line_counter + 1
 
-    return render_template('index.html', items=items)
+    return render_template('index.html', items=items, time=time)
 
 
 
 if __name__ == "__main__":
-    update_items = threading.Thread(target=update_items, daemon=True, name="Updater")
+    update_items = threading.Thread(target=update_items, name="Updater")
     update_items.start()
     app.run(host='0.0.0.0')
