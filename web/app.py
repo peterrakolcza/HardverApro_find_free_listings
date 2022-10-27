@@ -61,9 +61,9 @@ def update_items():
             price = parse.find_all("div", class_="uad-price")
             
             for row in price:
-                if row.text == "Csere" or row.text == "Keresem":
+                if row.text == "Keresem":
                     continue
-                if row.text == "Ingyenes" or int(row.text.replace("Ft", "").replace(" ", "")) <= 100:
+                if row.text == "Csere" or row.text == "Ingyenes" or int(row.text.replace("Ft", "").replace(" ", "")) <= 3000:
                     parent = row.parent
                     parent = parent.parent
                     link = parent.findChildren("a", recursive="False")
@@ -116,12 +116,59 @@ def list_free_items():
         for row in csv_reader:
             if line_counter == 0:
                 time = row[0]
+            elif row[3] == "Ingyenes":
+                items.append( [ line_counter, row[0], row[1], row[2], row[3], row[4] ] )
+            line_counter = line_counter + 1
+
+    return render_template('index.html', items=items, time=time)
+
+@app.route('/swap')
+def list_swap_items():
+    items = []
+    time = ""
+    with open('free_items.csv') as csv_file:
+        csv_reader = csv.reader(csv_file, delimiter=',')
+        line_counter = 0
+        for row in csv_reader:
+            if line_counter == 0:
+                time = row[0]
+            elif row[3] == "Csere":
+                items.append( [ line_counter, row[0], row[1], row[2], row[3], row[4] ] )
+            line_counter = line_counter + 1
+
+    return render_template('index.html', items=items, time=time)
+
+@app.route('/all')
+def list_all_items():
+    items = []
+    time = ""
+    with open('free_items.csv') as csv_file:
+        csv_reader = csv.reader(csv_file, delimiter=',')
+        line_counter = 0
+        for row in csv_reader:
+            if line_counter == 0:
+                time = row[0]
             else:
                 items.append( [ line_counter, row[0], row[1], row[2], row[3], row[4] ] )
             line_counter = line_counter + 1
 
     return render_template('index.html', items=items, time=time)
 
+@app.route('/price/<int:Price>')
+def list_items(Price):
+    items = []
+    time = ""
+    with open('free_items.csv') as csv_file:
+        csv_reader = csv.reader(csv_file, delimiter=',')
+        line_counter = 0
+        for row in csv_reader:
+            if line_counter == 0:
+                time = row[0]
+            elif (row[3] == "Ingyenes") or (int(row[3].replace("Ft", "").replace(" ", "")) <= Price):
+                items.append( [ line_counter, row[0], row[1], row[2], row[3], row[4] ] )
+            line_counter = line_counter + 1
+
+    return render_template('index.html', items=items, time=time)
 
 
 if __name__ == "__main__":

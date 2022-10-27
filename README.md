@@ -20,6 +20,5 @@ http://127.0.0.1:8090
 ## 📝Todo
 - list faulty devices
 - organize listings into categories
-- extend it to more sites
-- check if listing is active, otherwise skip
 - improve the naming of the listings
+- extend it to more sites
