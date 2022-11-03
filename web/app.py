@@ -1,4 +1,4 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, Response
 import threading
 import csv
 import time
@@ -6,9 +6,10 @@ import urllib.request
 from bs4 import BeautifulSoup
 from flask_sqlalchemy import SQLAlchemy
 from flask_statistics import Statistics
+from feedgen.feed import FeedGenerator
 app = Flask(__name__)
 
-""" Statistics - only working without Docker container
+#Statistics
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///database.db"
 
 db = SQLAlchemy(app)
@@ -34,7 +35,6 @@ class Request(db.Model):
 db.create_all()
 
 statistics = Statistics(app, db, Request)
-"""
 
 def update_items():
     while True:
@@ -47,6 +47,20 @@ def update_items():
         free_items_imgs = []
         free_items_price = []
         isItFrozen = []
+
+        new_free_items = []
+        new_free_items_links = []
+        new_free_items_imgs = []
+
+        #Loading in the old items
+        old_items = []
+        with open('free_items.csv') as csv_file:
+            csv_reader = csv.reader(csv_file, delimiter=',')
+            line_counter = 0
+            for row in csv_reader:
+                if line_counter != 0:
+                    old_items.append( row[1] )
+                line_counter = line_counter + 1
 
 
         # Processing
@@ -90,6 +104,12 @@ def update_items():
                     else:
                         isItFrozen.append(False)
 
+                    #Checking if item already existed before the previous run
+                    if (link not in old_items) and (parent.find('span', {'class': 'fas fa-snowflake fa-lg'}) == None) and (row.text == "Ingyenes"):
+                        new_free_items.append(title)
+                        new_free_items_links.append(link)
+                        new_free_items_imgs.append(img)
+
             # Trying to locate the next section
             try:
                 url = parse.find('a', {'title' : 'Következő blokk'})['href']
@@ -102,9 +122,13 @@ def update_items():
             writer.writerow( [ time.ctime() ] )
             for col1,col2,col3,col4,col5 in zip(free_items, free_items_links, free_items_imgs, free_items_price, isItFrozen):
                 writer.writerow([col1, col2, col3, col4, col5])
+        with open('new_free_items.csv', 'w') as csv_file:
+            writer = csv.writer(csv_file, delimiter=',')
+            for col1,col2,col3 in zip(new_free_items, new_free_items_links, new_free_items_imgs):
+                writer.writerow([col1, col2, col3 ])
         
         print("Updated the CSV file at: " + time.ctime())
-        time.sleep(60 * 60 * 12)
+        time.sleep(60 * 60 * 6)
 
 @app.route('/')
 def list_free_items():
@@ -164,11 +188,30 @@ def list_items(Price):
         for row in csv_reader:
             if line_counter == 0:
                 time = row[0]
+            elif row[3] == "Csere":
+                continue
             elif (row[3] == "Ingyenes") or (int(row[3].replace("Ft", "").replace(" ", "")) <= Price):
                 items.append( [ line_counter, row[0], row[1], row[2], row[3], row[4] ] )
             line_counter = line_counter + 1
 
     return render_template('index.html', items=items, time=time)
+
+@app.route('/rss')
+def get_feed():
+    feed = FeedGenerator()
+    feed.title("Free Stuff on HardverApró")
+    feed.description("This script allows the user to extract the free / very cheap items from HardverApró and view it in a browser. This page only shows free stuff. For every listing between free and 3000 Ft visit /all page or visit /price/'yourpricelimit' to filter the listings. Lastly, you can visit /swap.")
+    feed.link({'href': "https://hardverapro.rakolcza.ml"})
+    feed.load_extension('media')
+
+    with open('new_free_items.csv') as csv_file:
+        csv_reader = csv.reader(csv_file, delimiter=',')
+        for row in csv_reader:
+            entry = feed.add_entry()
+            entry.title(row[0])
+            entry.link({'href': row[1]})
+            entry.media.thumbnail({'url': row[2]})
+    return Response(feed.rss_str(), mimetype='application/rss+xml')
 
 
 if __name__ == "__main__":
