@@ -37,97 +37,102 @@ db.create_all()
 statistics = Statistics(app, db, Request)
 
 def update_items():
-    while True:
-        # Base and starting URL
-        base_url = 'https://hardverapro.hu'
-        url = '/aprok/keres.php?search_exac=0&search_title=0&buying=0&noiced=0&offset=0'
+    try:
+        while True:
+            # Base and starting URL
+            base_url = 'https://hardverapro.hu'
+            url = '/aprok/keres.php?search_exac=0&search_title=0&buying=0&noiced=0&offset=0'
 
-        free_items = []
-        free_items_links = []
-        free_items_imgs = []
-        free_items_price = []
-        isItFrozen = []
+            free_items = []
+            free_items_links = []
+            free_items_imgs = []
+            free_items_price = []
+            isItFrozen = []
 
-        new_free_items = []
-        new_free_items_links = []
-        new_free_items_imgs = []
+            new_free_items = []
+            new_free_items_links = []
+            new_free_items_imgs = []
 
-        #Loading in the old items
-        old_items = []
-        with open('free_items.csv') as csv_file:
-            csv_reader = csv.reader(csv_file, delimiter=',')
-            line_counter = 0
-            for row in csv_reader:
-                if line_counter != 0:
-                    old_items.append( row[1] )
-                line_counter = line_counter + 1
+            #Loading in the old items
+            old_items = []
+            with open('free_items.csv') as csv_file:
+                csv_reader = csv.reader(csv_file, delimiter=',')
+                line_counter = 0
+                for row in csv_reader:
+                    if line_counter != 0:
+                        old_items.append( row[1] )
+                    line_counter = line_counter + 1
 
 
-        # Processing
-        while url != None:
-            # Fetching the html
-            request = urllib.request.Request (base_url + url)
-            content = urllib.request.urlopen(request)
+            # Processing
+            while url != None:
+                # Fetching the html
+                request = urllib.request.Request (base_url + url)
+                content = urllib.request.urlopen(request)
 
-            # Parsing the html 
-            parse = BeautifulSoup(content, 'html.parser')
+                # Parsing the html 
+                parse = BeautifulSoup(content, 'html.parser')
 
-            price = parse.find_all("div", class_="uad-price")
-            
-            for row in price:
-                if row.text == "Keresem":
-                    continue
-                if row.text == "Csere" or row.text == "Ingyenes" or int(row.text.replace("Ft", "").replace(" ", "")) <= 3000:
-                    parent = row.parent
-                    parent = parent.parent
-                    link = parent.findChildren("a", recursive="False")
-                    link = link[0]["href"]
-                    link = link.strip()
-                    title = parent.find_all("div", class_="uad-title")
-                    title = title[0].text.strip()
-
-                    # Filter
-                    filtered = [ "eladót", "adás-vétel", "keresünk", "áron", "előresorolt" ]
-                    if any(x in title.lower() for x in filtered):
+                price = parse.find_all("div", class_="uad-price")
+                
+                for row in price:
+                    if row.text == "Keresem":
                         continue
+                    if row.text == "Csere" or row.text == "Ingyenes" or int(row.text.replace("Ft", "").replace(" ", "")) <= 3000:
+                        parent = row.parent
+                        parent = parent.parent
+                        link = parent.findChildren("a", recursive="False")
+                        link = link[0]["href"]
+                        link = link.strip()
+                        title = parent.find_all("div", class_="uad-title")
+                        title = title[0].text.strip()
 
-                    parent = parent.parent
-                    img = parent.findChildren("img", recursive="False")
-                    img = "https:" + img[0]["src"]
-                    
-                    free_items.append(title)
-                    free_items_links.append(link)
-                    free_items_imgs.append(img)
-                    free_items_price.append(row.text)
-                    if parent.find('span', {'class': 'fas fa-snowflake fa-lg'}) != None:
-                        isItFrozen.append(True)
-                    else:
-                        isItFrozen.append(False)
+                        # Filter
+                        filtered = [ "eladót", "adás-vétel", "keresünk", "áron", "előresorolt" ]
+                        if any(x in title.lower() for x in filtered):
+                            continue
 
-                    #Checking if item already existed before the previous run
-                    if (link not in old_items) and (parent.find('span', {'class': 'fas fa-snowflake fa-lg'}) == None) and (row.text == "Ingyenes"):
-                        new_free_items.append(title)
-                        new_free_items_links.append(link)
-                        new_free_items_imgs.append(img)
+                        parent = parent.parent
+                        img = parent.findChildren("img", recursive="False")
+                        img = "https:" + img[0]["src"]
+                        
+                        free_items.append(title)
+                        free_items_links.append(link)
+                        free_items_imgs.append(img)
+                        free_items_price.append(row.text)
+                        if parent.find('span', {'class': 'fas fa-snowflake fa-lg'}) != None:
+                            isItFrozen.append(True)
+                        else:
+                            isItFrozen.append(False)
 
-            # Trying to locate the next section
-            try:
-                url = parse.find('a', {'title' : 'Következő blokk'})['href']
-            except TypeError:
-                url = None
+                        #Checking if item already existed before the previous run
+                        if (link not in old_items) and (parent.find('span', {'class': 'fas fa-snowflake fa-lg'}) == None) and (row.text == "Ingyenes"):
+                            new_free_items.append(title)
+                            new_free_items_links.append(link)
+                            new_free_items_imgs.append(img)
 
-        # Writing extracted data in a csv file
-        with open('free_items.csv', 'w') as csv_file:
-            writer = csv.writer(csv_file, delimiter=',')
-            writer.writerow( [ time.ctime() ] )
-            for col1,col2,col3,col4,col5 in zip(free_items, free_items_links, free_items_imgs, free_items_price, isItFrozen):
-                writer.writerow([col1, col2, col3, col4, col5])
-        with open('new_free_items.csv', 'w') as csv_file:
-            writer = csv.writer(csv_file, delimiter=',')
-            for col1,col2,col3 in zip(new_free_items, new_free_items_links, new_free_items_imgs):
-                writer.writerow([col1, col2, col3 ])
-        
-        print("Updated the CSV file at: " + time.ctime())
+                # Trying to locate the next section
+                try:
+                    url = parse.find('a', {'title' : 'Következő blokk'})['href']
+                except TypeError:
+                    url = None
+
+            # Writing extracted data in a csv file
+            with open('free_items.csv', 'w') as csv_file:
+                writer = csv.writer(csv_file, delimiter=',')
+                writer.writerow( [ time.ctime() ] )
+                for col1,col2,col3,col4,col5 in zip(free_items, free_items_links, free_items_imgs, free_items_price, isItFrozen):
+                    writer.writerow([col1, col2, col3, col4, col5])
+            with open('new_free_items.csv', 'w') as csv_file:
+                writer = csv.writer(csv_file, delimiter=',')
+                for col1,col2,col3 in zip(new_free_items, new_free_items_links, new_free_items_imgs):
+                    writer.writerow([col1, col2, col3 ])
+            
+            print("Updated the CSV file at: " + time.ctime())
+
+        except Exception as err:
+            print(f"Unexpected {err=}, {type(err)=}")
+            
         time.sleep(60 * 60 * 6)
 
 @app.route('/')

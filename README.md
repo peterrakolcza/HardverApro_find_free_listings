@@ -3,6 +3,8 @@
 # HardverApró - find free listings
 This script allows the user to extract the free items from HardverApró and view it in a browser.
 
+I am a hosting a working and up to date version [here](https://hardverapro.rakolcza.ml/).
+
 ## ⚠️Usage
 First, install Docker and docker-compose
 After that, you can use the following command to start the container
