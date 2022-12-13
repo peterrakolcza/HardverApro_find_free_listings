@@ -9,6 +9,7 @@ from flask_statistics import Statistics
 from feedgen.feed import FeedGenerator
 app = Flask(__name__)
 
+"""
 #Statistics
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///database.db"
 
@@ -35,6 +36,7 @@ class Request(db.Model):
 db.create_all()
 
 statistics = Statistics(app, db, Request)
+"""
 
 def update_items():
     try:
@@ -130,8 +132,8 @@ def update_items():
             
             print("Updated the CSV file at: " + time.ctime())
 
-        except Exception as err:
-            print(f"Unexpected {err=}, {type(err)=}")
+    except Exception as err:
+        print("Unexpected ", err)
             
         time.sleep(60 * 60 * 6)
 
