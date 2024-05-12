@@ -1,12 +1,7 @@
 version: "3"
 services:
   web:
-    build: ./web
+    build: .
     container_name: web
     ports:
       - "8090:5000"
-    volumes:
-      - shared-volume:/src
-
-volumes:
-  shared-volume:
