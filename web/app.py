@@ -7,6 +7,7 @@ from bs4 import BeautifulSoup
 from flask_sqlalchemy import SQLAlchemy
 from flask_statistics import Statistics
 from feedgen.feed import FeedGenerator
+import re
 app = Flask(__name__)
 
 """
@@ -70,7 +71,8 @@ def update_items():
             while url != None:
                 # Fetching the html
                 request = urllib.request.Request (base_url + url)
-                content = urllib.request.urlopen(request).read()
+                print(base_url + url)
+                content = urllib.request.urlopen(request)
 
                 # Parsing the html 
                 parse = BeautifulSoup(content, 'html.parser')
@@ -88,6 +90,7 @@ def update_items():
                         link = link.strip()
                         title = parent.find_all("div", class_="uad-title")
                         title = title[0].text.strip()
+                        title = re.sub(r'[^\x00-\x7F]', ' ', title)
 
                         # Filter
                         filtered = [ "eladót", "adás-vétel", "keresünk", "áron", "előresorolt" ]
