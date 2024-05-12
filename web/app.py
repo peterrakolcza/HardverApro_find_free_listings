@@ -71,7 +71,6 @@ def update_items():
             while url != None:
                 # Fetching the html
                 request = urllib.request.Request (base_url + url)
-                print(base_url + url)
                 content = urllib.request.urlopen(request)
 
                 # Parsing the html 
