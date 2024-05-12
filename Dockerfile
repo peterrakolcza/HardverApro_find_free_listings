@@ -3,5 +3,5 @@ WORKDIR /web
 RUN apk add --no-cache gcc musl-dev linux-headers libffi-dev
 COPY requirements.txt requirements.txt
 RUN pip3 install -r requirements.txt
-COPY . ./web
+COPY . .
 CMD [ "python", "app.py"]
