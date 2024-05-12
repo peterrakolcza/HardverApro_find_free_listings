@@ -70,7 +70,7 @@ def update_items():
             while url != None:
                 # Fetching the html
                 request = urllib.request.Request (base_url + url)
-                content = urllib.request.urlopen(request)
+                content = urllib.request.urlopen(request).read()
 
                 # Parsing the html 
                 parse = BeautifulSoup(content, 'html.parser')
@@ -120,22 +120,22 @@ def update_items():
                     url = None
 
             # Writing extracted data in a csv file
-            with open('free_items.csv', 'w') as csv_file:
+            with open('free_items.csv', 'w', newline='') as csv_file:
                 writer = csv.writer(csv_file, delimiter=',')
                 writer.writerow( [ time.ctime() ] )
                 for col1,col2,col3,col4,col5 in zip(free_items, free_items_links, free_items_imgs, free_items_price, isItFrozen):
                     writer.writerow([col1, col2, col3, col4, col5])
-            with open('new_free_items.csv', 'w') as csv_file:
+            with open('new_free_items.csv', 'w', newline='') as csv_file:
                 writer = csv.writer(csv_file, delimiter=',')
                 for col1,col2,col3 in zip(new_free_items, new_free_items_links, new_free_items_imgs):
                     writer.writerow([col1, col2, col3 ])
             
             print("Updated the CSV file at: " + time.ctime())
+            
+            time.sleep(60 * 60 * 6)
 
     except Exception as err:
         print("Unexpected ", err)
-            
-        time.sleep(60 * 60 * 6)
 
 @app.route('/')
 def list_free_items():
